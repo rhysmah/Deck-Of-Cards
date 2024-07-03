@@ -76,14 +76,12 @@ func (c Card) String() (string, error) {
 
 // Creates a complete deck of cards
 func New() []Card {
-
 	deckOfCards := []Card{}
 	for suit := Spades; suit <= Hearts; suit++ {
 		for value := Ace; value <= King; value++ {
 			deckOfCards = append(deckOfCards, Card{suit, value})
 		}
 	}
-
 	log.Println("Successfully created deck of cards")
 	return deckOfCards
 }
