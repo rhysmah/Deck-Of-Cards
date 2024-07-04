@@ -3,13 +3,11 @@ package deck
 import (
 	"fmt"
 	"log"
+	_ "math/rand"
 )
 
-// Represents the suit of a card
-type Suit uint8
-
-// Represents the value of a card
-type Value uint8
+type Suit uint8  // Represents the suit of a card
+type Value uint8 // Represents the value of a card
 
 const (
 	Spades   Suit = iota // value 0
@@ -72,6 +70,22 @@ func (c Card) String() (string, error) {
 		return "", fmt.Errorf("invalid card suit: %d", c.Suit)
 	}
 	return fmt.Sprintf("%s of %s", values[c.Value], suits[c.Suit]), nil
+}
+
+// Configuration Options
+type DeckOptions struct {
+	shuffle bool // Determines if cards are initially shuffled
+	// sortMethod func([]Card)         // A custom way to sort the Deck
+	// numJokers  int                  // Determines how many jokers are added to the deck
+	// filterFunc func(card Card) bool // A function for removing a particular card
+}
+
+type DeckOptionsFunc func(deckopts *DeckOptions)
+
+func WithShuffle() DeckOptionsFunc {
+	return func(deckopts *DeckOptions) {
+		deckopts.shuffle = true
+	}
 }
 
 // Creates a complete deck of cards
