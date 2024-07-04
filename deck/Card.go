@@ -62,34 +62,39 @@ type Card struct {
 	Value Value
 }
 
-func (c Card) String() (string, error) {
+func (c Card) String() string {
 	if c.Value < Ace || c.Value > King {
-		return "", fmt.Errorf("invalid card value: %d", c.Value)
+		return fmt.Sprintf("invalid card value: %d", c.Value)
 	}
 	if c.Suit < Spades || c.Suit > Hearts {
-		return "", fmt.Errorf("invalid card suit: %d", c.Suit)
+		return fmt.Sprintf("invalid card suit: %d", c.Suit)
 	}
-	return fmt.Sprintf("%s of %s", values[c.Value], suits[c.Suit]), nil
+	return fmt.Sprintf("%s of %s", values[c.Value], suits[c.Suit])
 }
 
 // Configuration Options
 type DeckOptions struct {
-	shuffle bool // Determines if cards are initially shuffled
-	// sortMethod func([]Card)         // A custom way to sort the Deck
-	// numJokers  int                  // Determines how many jokers are added to the deck
-	// filterFunc func(card Card) bool // A function for removing a particular card
+	shuffle bool
 }
 
-type DeckOptionsFunc func(deckopts *DeckOptions)
+type DeckOptionsFunc func(deckOpts *DeckOptions)
 
 func WithShuffle() DeckOptionsFunc {
-	return func(deckopts *DeckOptions) {
-		deckopts.shuffle = true
+	return func(deckOpts *DeckOptions) {
+		deckOpts.shuffle = true
 	}
 }
 
 // Creates a complete deck of cards
-func New() []Card {
+func New(opts ...DeckOptionsFunc) []Card {
+	defaultConfig := &DeckOptions{
+		shuffle: false,
+	}
+
+	for _, opt := range opts {
+		opt(defaultConfig)
+	}
+
 	deckOfCards := []Card{}
 	for suit := Spades; suit <= Hearts; suit++ {
 		for value := Ace; value <= King; value++ {

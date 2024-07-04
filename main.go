@@ -7,5 +7,7 @@ import (
 
 func main() {
 	cards := deck.New()
-	fmt.Println(cards)
+	for _, card := range cards {
+		fmt.Println(card)
+	}
 }
