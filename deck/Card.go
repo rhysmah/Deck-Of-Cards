@@ -62,6 +62,7 @@ type Card struct {
 	Value Value
 }
 
+// String() is a special method that's called whenever a print function is used
 func (c Card) String() string {
 	if c.Value < Ace || c.Value > King {
 		return fmt.Sprintf("invalid card value: %d", c.Value)
