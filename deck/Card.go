@@ -3,7 +3,7 @@ package deck
 import (
 	"fmt"
 	"log"
-	_ "math/rand"
+	"math/rand"
 )
 
 type Suit uint8  // Represents the suit of a card
@@ -96,12 +96,25 @@ func New(opts ...DeckOptionsFunc) []Card {
 		opt(defaultConfig)
 	}
 
+	// Create standard deck of cards
 	deckOfCards := []Card{}
 	for suit := Spades; suit <= Hearts; suit++ {
 		for value := Ace; value <= King; value++ {
 			deckOfCards = append(deckOfCards, Card{suit, value})
 		}
 	}
+	// Check for shuffle; if true, shuffle cards accordingly
+	if defaultConfig.shuffle {
+		shuffle(deckOfCards)
+	}
+
 	log.Println("Successfully created deck of cards")
 	return deckOfCards
+}
+
+func shuffle(cards []Card) {
+	perm := rand.Perm(len(cards))
+	for i, v := range perm {
+		cards[i], cards[v] = cards[v], cards[i]
+	}
 }
