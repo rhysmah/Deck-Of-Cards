@@ -32,6 +32,11 @@ const (
 	King                   // value 13
 )
 
+const (
+	JokerSuit  Suit  = iota + 4
+	JokerValue Value = 0
+)
+
 // Maps for the string representation of the suit and value
 // Allows for readable output when printing a card, e.g. "Ace of Spades" instead of {0, 0}
 var suits = map[Suit]string{
@@ -39,6 +44,7 @@ var suits = map[Suit]string{
 	1: "Diamonds",
 	2: "Clubs",
 	3: "Hearts",
+	4: "Joker",
 }
 
 var values = map[Value]string{
@@ -64,18 +70,24 @@ type Card struct {
 
 // String() is a special method that's called whenever a print function is used
 func (c Card) String() string {
+	if c.Suit == JokerSuit {
+		return fmt.Sprint(suits[c.Suit])
+	}
 	if c.Value < Ace || c.Value > King {
 		return fmt.Sprintf("invalid card value: %d", c.Value)
 	}
 	if c.Suit < Spades || c.Suit > Hearts {
 		return fmt.Sprintf("invalid card suit: %d", c.Suit)
 	}
+
 	return fmt.Sprintf("%s of %s", values[c.Value], suits[c.Suit])
 }
 
 // Configuration Options
 type DeckOptions struct {
-	shuffle bool
+	shuffle    bool
+	filterCard func(card Card) bool
+	numJokers  int
 }
 
 type DeckOptionsFunc func(deckOpts *DeckOptions)
@@ -86,10 +98,24 @@ func WithShuffle() DeckOptionsFunc {
 	}
 }
 
+func WithFilteredCards(filterFunc func(card Card) bool) DeckOptionsFunc {
+	return func(deckOpts *DeckOptions) {
+		deckOpts.filterCard = filterFunc
+	}
+}
+
+func WithJokers(n int) DeckOptionsFunc {
+	return func(deckOpts *DeckOptions) {
+		deckOpts.numJokers = n
+	}
+}
+
 // Creates a complete deck of cards
 func New(opts ...DeckOptionsFunc) []Card {
 	defaultConfig := &DeckOptions{
-		shuffle: false,
+		shuffle:    false,
+		filterCard: nil,
+		numJokers:  0,
 	}
 
 	for _, opt := range opts {
@@ -100,9 +126,18 @@ func New(opts ...DeckOptionsFunc) []Card {
 	deckOfCards := []Card{}
 	for suit := Spades; suit <= Hearts; suit++ {
 		for value := Ace; value <= King; value++ {
-			deckOfCards = append(deckOfCards, Card{suit, value})
+			card := Card{Suit: suit, Value: value}
+
+			if defaultConfig.filterCard == nil || !defaultConfig.filterCard(card) {
+				deckOfCards = append(deckOfCards, card)
+			}
 		}
 	}
+
+	for i := 0; i < defaultConfig.numJokers; i++ {
+		deckOfCards = append(deckOfCards, Card{Suit: JokerSuit, Value: JokerValue})
+	}
+
 	// Check for shuffle; if true, shuffle cards accordingly
 	if defaultConfig.shuffle {
 		shuffle(deckOfCards)
