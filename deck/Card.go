@@ -10,31 +10,29 @@ type Suit uint8  // Represents the suit of a card
 type Value uint8 // Represents the value of a card
 
 const (
-	Spades   Suit = iota // value 0
-	Diamonds             // value 1
-	Clubs                // value 2
-	Hearts               // value 3
+	Spades    Suit = iota // value 0
+	Diamonds              // value 1
+	Clubs                 // value 2
+	Hearts                // value 3
+	JokerSuit             // value 4
 )
 
 const (
-	Ace   Value = iota + 1 // value 1
-	Two                    // value 2
-	Three                  // value 3
-	Four                   // value 4
-	Five                   // value 5
-	Six                    // value 6
-	Seven                  // value 7
-	Eight                  // value 8
-	Nine                   // value 9
-	Ten                    // value 10
-	Jack                   // value 11
-	Queen                  // value 12
-	King                   // value 13
-)
+	JokerValue Value = iota // value 0
+	Ace                     // value 1
+	Two                     // value 2
+	Three                   // value 3
+	Four                    // value 4
+	Five                    // value 5
+	Six                     // value 6
+	Seven                   // value 7
+	Eight                   // value 8
+	Nine                    // value 9
+	Ten                     // value 10
+	Jack                    // value 11
+	Queen                   // value 12
+	King                    // value 13
 
-const (
-	JokerSuit  Suit  = iota + 4
-	JokerValue Value = 0
 )
 
 // Maps for the string representation of the suit and value
