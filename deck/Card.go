@@ -4,10 +4,36 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sort"
 )
 
 type Suit uint8  // Represents the suit of a card
 type Value uint8 // Represents the value of a card
+
+type Card struct {
+	Suit  Suit
+	Value Value
+}
+
+type BySuit []Card
+
+func (a BySuit) Len() int           { return len(a) }
+func (a BySuit) Swap(i, j int)      { a[i].Suit, a[j].Suit = a[j].Suit, a[i].Suit }
+func (a BySuit) Less(i, j int) bool { return a[i].Suit < a[j].Suit }
+
+func SortBySuit(deckOfCards []Card) {
+	sort.Sort(BySuit(deckOfCards))
+}
+
+type ByValue []Card
+
+func (a ByValue) Len() int           { return len(a) }
+func (a ByValue) Swap(i, j int)      { a[i].Value, a[j].Value = a[j].Value, a[i].Value }
+func (a ByValue) Less(i, j int) bool { return a[i].Value < a[j].Value }
+
+func SortByValue(deckOfCards []Card) {
+	sort.Sort(ByValue(deckOfCards))
+}
 
 const (
 	Spades    Suit = iota // value 0
@@ -61,11 +87,6 @@ var values = map[Value]string{
 	13: "King",
 }
 
-type Card struct {
-	Suit  Suit
-	Value Value
-}
-
 // String() is a special method that's called whenever a print function is used
 func (c Card) String() string {
 	if c.Suit == JokerSuit {
@@ -77,18 +98,24 @@ func (c Card) String() string {
 	if c.Suit < Spades || c.Suit > Hearts {
 		return fmt.Sprintf("invalid card suit: %d", c.Suit)
 	}
-
 	return fmt.Sprintf("%s of %s", values[c.Value], suits[c.Suit])
 }
 
 // Configuration Options
 type DeckOptions struct {
+	sortFunc   func([]Card)
 	shuffle    bool
 	filterCard func(card Card) bool
 	numJokers  int
 }
 
 type DeckOptionsFunc func(deckOpts *DeckOptions)
+
+func WithSort(sortFunc func([]Card)) DeckOptionsFunc {
+	return func(DeckOpts *DeckOptions) {
+		DeckOpts.sortFunc = sortFunc
+	}
+}
 
 func WithShuffle() DeckOptionsFunc {
 	return func(deckOpts *DeckOptions) {
@@ -111,6 +138,7 @@ func WithJokers(n int) DeckOptionsFunc {
 // Creates a complete deck of cards
 func New(opts ...DeckOptionsFunc) []Card {
 	defaultConfig := &DeckOptions{
+		sortFunc:   SortBySuit,
 		shuffle:    false,
 		filterCard: nil,
 		numJokers:  0,
@@ -126,20 +154,24 @@ func New(opts ...DeckOptionsFunc) []Card {
 		for value := Ace; value <= King; value++ {
 			card := Card{Suit: suit, Value: value}
 
+			// Filter cards (if applicable)
 			if defaultConfig.filterCard == nil || !defaultConfig.filterCard(card) {
 				deckOfCards = append(deckOfCards, card)
 			}
 		}
 	}
 
+	// Add Jokers (if applicable)
 	for i := 0; i < defaultConfig.numJokers; i++ {
 		deckOfCards = append(deckOfCards, Card{Suit: JokerSuit, Value: JokerValue})
 	}
 
-	// Check for shuffle; if true, shuffle cards accordingly
+	// Shuffle cards (if applicable)
 	if defaultConfig.shuffle {
 		shuffle(deckOfCards)
 	}
+
+	defaultConfig.sortFunc(deckOfCards)
 
 	log.Println("Successfully created deck of cards")
 	return deckOfCards

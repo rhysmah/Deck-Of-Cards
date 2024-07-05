@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	cards := deck.New(deck.WithJokers(2))
+	cards := deck.New(deck.WithSort(deck.SortBySuit))
 	for _, card := range cards {
 		fmt.Println(card)
 	}
