@@ -61,7 +61,6 @@ const (
 	Jack                    // value 11
 	Queen                   // value 12
 	King                    // value 13
-
 )
 
 // Maps for the string representation of the suit and value
